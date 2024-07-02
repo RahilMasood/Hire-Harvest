@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hire Harvest</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .hamburger {
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .profile {
+            cursor: pointer;
+        }
+        .search-bar {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        .search-bar input {
+            width: 50%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .tool-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 20px;
+        }
+        .tool-item {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin: 10px;
+            padding: 10px;
+            width: 200px;
+            text-align: center;
+        }
+        .tool-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-bottom: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+        .tool-item button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .tool-item button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="hamburger">☰</div>
+        <div class="profile">Profile</div>
+    </header>
+    <div class="search-bar">
+        <input type="text" id="search-input" placeholder="Search for tools...">
+    </div>
+    <div class="tool-list" id="tool-list">
+        {% for tool in tools %}
+        <div class="tool-item">
+            <img src="{{ tool.photo }}" alt="{{ tool.name }}">
+            <h3>{{ tool.name }}</h3>
+            <p>Price: ${{ tool.price }}</p>
+            <p>Rating: {{ tool.rating }}</p>
+            <button onclick="bookTool({{ tool.id }})">Book</button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        document.getElementById('search-input').addEventListener('input', function() {
+            const query = this.value;
+            fetch(`/search?q=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    const toolList = document.getElementById('tool-list');
+                    toolList.innerHTML = '';
+                    data.forEach(tool => {
+                        const toolItem = document.createElement('div');
+                        toolItem.className = 'tool-item';
+                        toolItem.innerHTML = `
+                            <img src="${tool.photo}" alt="${tool.name}">
+                            <h3>${tool.name}</h3>
+                            <p>Price: $${tool.price}</p>
+                            <p>Rating: ${tool.rating}</p>
+                            <button onclick="bookTool(${tool.id})">Book</button>
+                        `;
+                        toolList.appendChild(toolItem);
+                    });
+                });
+        });
+
+        function bookTool(toolId) {
+            fetch(`/book/${toolId}`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                });
+        }
+    </script>
+</body>
+</html>
